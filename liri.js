@@ -1,47 +1,11 @@
 // Grab de axios package...
+var inquirer = require("inquirer");
 var axios = require("axios");
 var Spotify = require('node-spotify-api');
 
-var app = process.argv[2];
-var item1 = process.argv[3];
-var item2 = process.argv[4];
-console.log(
-    "The app you are requesting is: " + app +
-    "\n and the item you are looking is " + item1 +
-    "\n-----------------------------------------"
-);
-
-function liri(app, item1, item2) {
-
-    if (app == "spotify") {
-        var data = spotify(item1, item2);
-    }
-
-    else if (app == "omdb") {
-        var data = omdb(item1);
-    }
-
-    else if (app == "bandsintown") {
-
-        var data = bandsintown(item1);
-
-    }
-
-    else {
-        console.log("Function not programmed already!");
-    }
-
-};
-
-
 // Functions to run-----------------------------------------
 
-function spotify(inputType, inputQuery) {
-
-    console.log(
-        "The inputType is " + inputType +
-        "\n and the inputQuery is " + inputQuery
-    )
+function spotify(type, query) {
 
     var spotify = new Spotify({
         id: "b9c37781047044988e8a462f0d0884fb",
@@ -49,7 +13,7 @@ function spotify(inputType, inputQuery) {
     });
 
     spotify
-        .search({ type: inputType, query: inputQuery })
+        .search({ type: type, query: query })
         .then(function (response) {
             console.log(JSON.stringify(response, null, 2));
         })
@@ -58,9 +22,9 @@ function spotify(inputType, inputQuery) {
         });
 };
 
-function bandsintown(item1){
+function bandsintown(band){
     axios
-            .get("https://rest.bandsintown.com/artists/" + item1 + "?app_id=trilogy")
+            .get("https://rest.bandsintown.com/artists/" + band + "?app_id=trilogy")
             .then(function (response) {
                 // If the axios was successful...
                 // Then log the body from the site!
@@ -85,8 +49,8 @@ function bandsintown(item1){
             });
 }
 
-function omdb(item1){
-    axios.get("http://www.omdbapi.com/?t=" + item1 + "&y=&plot=short&apikey=ccdf16c0").then(
+function omdb(movie){
+    axios.get("http://www.omdbapi.com/?t=" + movie + "&y=&plot=short&apikey=ccdf16c0").then(
             function (response) {
                 console.log(JSON.stringify(response.data, null, 2));
             }
@@ -94,4 +58,55 @@ function omdb(item1){
 }
 
 
-liri(app, item1, item2);
+function init(){
+
+    inquirer.prompt([
+        {
+            name: "app",
+            message: "Spotify, OMDB or BandsInTown (capital sensitive)"
+
+        },
+    ]).then(function(answers){
+
+        console.log(answers.app);
+
+        if (answers.app == "Spotify"){
+            inquirer.prompt([
+                {
+                    name: "type",
+                    message: "Artist, album or track?"
+                },
+                {
+                    name: "query",
+                    message: "Which artist, album or track?"
+                }
+            ]).then(function(data){
+                spotify(data.type, data.query);
+            })
+        }
+
+        if (answers.app == "OMDB"){
+            inquirer.prompt([
+                {
+                    name: "movie",
+                    message: "which movie are you looking for?"
+                }
+            ]).then(function(data){
+                omdb(data.movie);
+            })
+        }
+
+        if (answers.app == "BandsInTown"){
+            inquirer.prompt([
+                {
+                    name: "band",
+                    message: "which band are you looking for?"
+                }
+            ]).then(function(data){
+                bandsintown(data.band);
+            })
+        }
+    })
+}
+
+init();
