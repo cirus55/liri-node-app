@@ -15,20 +15,51 @@ function liri(app, item1, item2) {
 
     if (app == "spotify") {
         var data = spotify(item1, item2);
-        console.log(data);
     }
 
     else if (app == "omdb") {
-        axios.get("http://www.omdbapi.com/?t=" + item1 + "&y=&plot=short&apikey=ccdf16c0").then(
-            function (response) {
-                console.log(JSON.stringify(response.data, null, 2));
-            }
-        );
+        var data = omdb(item1);
     }
 
     else if (app == "bandsintown") {
 
-        axios
+        var data = bandsintown(item1);
+
+    }
+
+    else {
+        console.log("Function not programmed already!");
+    }
+
+};
+
+
+// Functions to run-----------------------------------------
+
+function spotify(inputType, inputQuery) {
+
+    console.log(
+        "The inputType is " + inputType +
+        "\n and the inputQuery is " + inputQuery
+    )
+
+    var spotify = new Spotify({
+        id: "b9c37781047044988e8a462f0d0884fb",
+        secret: "1ab6d458d05346fa9b3cc7a0b6175ed4"
+    });
+
+    spotify
+        .search({ type: inputType, query: inputQuery })
+        .then(function (response) {
+            console.log(JSON.stringify(response, null, 2));
+        })
+        .catch(function (err) {
+            console.log(err);
+        });
+};
+
+function bandsintown(item1){
+    axios
             .get("https://rest.bandsintown.com/artists/" + item1 + "?app_id=trilogy")
             .then(function (response) {
                 // If the axios was successful...
@@ -52,35 +83,15 @@ function liri(app, item1, item2) {
                 }
                 console.log(error.config);
             });
+}
 
-    }
+function omdb(item1){
+    axios.get("http://www.omdbapi.com/?t=" + item1 + "&y=&plot=short&apikey=ccdf16c0").then(
+            function (response) {
+                console.log(JSON.stringify(response.data, null, 2));
+            }
+        );
+}
 
-    else {
-        console.log("Function not programmed already!");
-    }
-
-};
-
-function spotify(inputType, inputQuery) {
-
-    console.log(
-        "The inputType is " + inputType +
-        "\n and the inputQuery is " + inputQuery
-    )
-
-    var spotify = new Spotify({
-        id: "b9c37781047044988e8a462f0d0884fb",
-        secret: "1ab6d458d05346fa9b3cc7a0b6175ed4"
-    });
-
-    spotify
-        .search({ type: inputType, query: inputQuery })
-        .then(function (response) {
-            console.log(JSON.stringify(response, null, 2));
-        })
-        .catch(function (err) {
-            console.log(err);
-        });
-};
 
 liri(app, item1, item2);
